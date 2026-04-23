@@ -3,6 +3,7 @@ import { useTranslation, LOCALE_KEYS } from '@/services/localization';
 import { useMoods } from '@/hooks/useMoods';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
+import { AIInsights } from '@/components/AIInsights';
 import { Frown, Meh, Smile, Heart, Star } from 'lucide-react';
 import { cn } from '@/services/utils';
 
@@ -127,6 +128,8 @@ export function Dashboard() {
           )}
         </Card>
       </section>
+
+      <AIInsights />
 
       <section className="space-y-4">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">

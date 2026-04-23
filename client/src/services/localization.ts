@@ -24,6 +24,11 @@ export const LOCALE_KEYS = {
   NO_ENTRIES: 'NO_ENTRIES',
   FILTER_BY_MOOD: 'FILTER_BY_MOOD',
   ALL_MOODS: 'ALL_MOODS',
+  AI_INSIGHTS_TITLE: 'AI_INSIGHTS_TITLE',
+  AI_INSIGHTS_LOW: 'AI_INSIGHTS_LOW',
+  AI_INSIGHTS_MEDIUM: 'AI_INSIGHTS_MEDIUM',
+  AI_INSIGHTS_HIGH: 'AI_INSIGHTS_HIGH',
+  AI_INSIGHTS_NO_DATA: 'AI_INSIGHTS_NO_DATA',
 } as const;
 
 type Locale = 'en' | 'uk';
@@ -53,6 +58,11 @@ const translations: Record<Locale, Record<string, string>> = {
     [LOCALE_KEYS.NO_ENTRIES]: 'No entries yet.',
     [LOCALE_KEYS.FILTER_BY_MOOD]: 'Filter by mood',
     [LOCALE_KEYS.ALL_MOODS]: 'All Moods',
+    [LOCALE_KEYS.AI_INSIGHTS_TITLE]: 'AI Insights',
+    [LOCALE_KEYS.AI_INSIGHTS_LOW]: "It looks like the month has been tough. AI suggests taking some time for rest and trying breathing techniques.",
+    [LOCALE_KEYS.AI_INSIGHTS_MEDIUM]: "Your state is stable. AI recommends maintaining a balance between work and study.",
+    [LOCALE_KEYS.AI_INSIGHTS_HIGH]: "Great result! Your energy level is high, it's a good time for new achievements.",
+    [LOCALE_KEYS.AI_INSIGHTS_NO_DATA]: "Not enough data for analysis yet. Keep tracking your mood!",
   },
   uk: {
     [LOCALE_KEYS.HOW_ARE_YOU]: 'Як ви почуваєтесь?',
@@ -78,6 +88,11 @@ const translations: Record<Locale, Record<string, string>> = {
     [LOCALE_KEYS.NO_ENTRIES]: 'Записів ще немає.',
     [LOCALE_KEYS.FILTER_BY_MOOD]: 'Фільтрувати за настроєм',
     [LOCALE_KEYS.ALL_MOODS]: 'Всі настрої',
+    [LOCALE_KEYS.AI_INSIGHTS_TITLE]: 'ШІ-поради',
+    [LOCALE_KEYS.AI_INSIGHTS_LOW]: 'Схоже, місяць видався непростим. ШІ радить приділити час відпочинку та спробувати техніки дихання.',
+    [LOCALE_KEYS.AI_INSIGHTS_MEDIUM]: 'Твій стан стабільний. ШІ рекомендує підтримувати баланс між роботою та навчанням.',
+    [LOCALE_KEYS.AI_INSIGHTS_HIGH]: 'Чудовий результат! Твій рівень енергії високий, це гарний час для нових звершень.',
+    [LOCALE_KEYS.AI_INSIGHTS_NO_DATA]: 'Ще недостатньо даних для аналізу. Продовжуйте відзначати свій настрій!',
   },
 };
 
