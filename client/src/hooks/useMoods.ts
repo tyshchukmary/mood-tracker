@@ -1,5 +1,7 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { useMoodStore, type MoodEntry } from '@/store/useMoodStore';
+import { supabase } from '@/services/supabase';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const MOCK_ENTRIES: MoodEntry[] = [
   {
@@ -29,18 +31,102 @@ const MOCK_ENTRIES: MoodEntry[] = [
 ];
 
 export function useMoods() {
-  const { entries, setEntries, isLoading, setLoading, addEntry } = useMoodStore();
+  const { entries, setEntries, isLoading, setLoading, addEntry: addEntryToStore } = useMoodStore();
+  const { user } = useAuthStore();
+
+  const fetchEntries = useCallback(async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('mood_entries')
+        .select(`
+          id,
+          mood_level,
+          note,
+          created_at,
+          activities:mood_entry_activities(
+            activity:activities(name)
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        const formattedEntries: MoodEntry[] = data.map((entry: any) => ({
+          id: entry.id,
+          user_id: user.id,
+          mood_level: entry.mood_level,
+          note: entry.note,
+          created_at: entry.created_at,
+          activities: entry.activities.map((a: any) => a.activity.name),
+        }));
+        setEntries(formattedEntries);
+      }
+    } catch (error) {
+      console.warn('Supabase fetch failed, falling back to local state/mocks:', error);
+      if (entries.length === 0) {
+        setEntries(MOCK_ENTRIES);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [user, setEntries, setLoading, entries.length]);
 
   useEffect(() => {
-    if (entries.length === 0) {
-      setLoading(true);
-      const timer = setTimeout(() => {
-        setEntries(MOCK_ENTRIES);
-        setLoading(false);
-      }, 800);
-      return () => clearTimeout(timer);
+    if (user) {
+      fetchEntries();
     }
-  }, [entries.length, setEntries, setLoading]);
+  }, [user, fetchEntries]);
+
+  const addMoodEntry = async (entry: Omit<MoodEntry, 'id' | 'created_at'>) => {
+    if (!user) {
+      addEntryToStore(entry);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 1. Add mood entry
+      const { data: moodData, error: moodError } = await supabase
+        .from('mood_entries')
+        .insert({
+          user_id: user.id,
+          mood_level: entry.mood_level,
+          note: entry.note,
+        })
+        .select()
+        .single();
+
+      if (moodError) throw moodError;
+
+      // 2. Add activities (assuming they exist in the 'activities' table)
+      if (entry.activities.length > 0) {
+        // First, get activity IDs
+        const { data: actData } = await supabase
+          .from('activities')
+          .select('id, name')
+          .in('name', entry.activities);
+
+        if (actData && actData.length > 0) {
+          const activityLinks = actData.map(act => ({
+            mood_entry_id: moodData.id,
+            activity_id: act.id,
+          }));
+          await supabase.from('mood_entry_activities').insert(activityLinks);
+        }
+      }
+
+      await fetchEntries();
+    } catch (error) {
+      console.error('Error adding mood entry to Supabase:', error);
+      addEntryToStore(entry); // Fallback to local
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const moodTrends = useMemo(() => {
     return entries.slice(0, 7).map(entry => ({
@@ -71,9 +157,10 @@ export function useMoods() {
   return {
     entries,
     isLoading,
-    addEntry,
+    addEntry: addMoodEntry,
     moodTrends,
     topActivityOnHappyDays,
-    averageMood
+    averageMood,
+    refreshEntries: fetchEntries
   };
 }

@@ -1,9 +1,22 @@
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, LogIn, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/common/Button';
+import { useAuthStore } from '@/store/useAuthStore';
+import { supabase } from '@/services/supabase';
 
 export function Header() {
   const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
+  const { user, signOut } = useAuthStore();
+
+  const handleAuth = async () => {
+    if (user) {
+      await signOut();
+    } else {
+      // In a real app, this would redirect to a login page or open a modal
+      // For this prototype, we'll use Google OAuth as an example
+      await supabase.auth.signInWithOAuth({ provider: 'google' });
+    }
+  };
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -32,9 +45,14 @@ export function Header() {
           Mood Tracker
         </h1>
         <div className="hidden md:block" /> {/* Spacer for desktop */}
-        <Button variant="ghost" size="icon" onClick={toggleTheme}>
-          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={handleAuth}>
+            {user ? <LogOut className="h-5 w-5" /> : <LogIn className="h-5 w-5" />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
     </header>
   );
