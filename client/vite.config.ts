@@ -3,10 +3,13 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  css: {
-    transformer: 'postcss', // Це змусить Vite ігнорувати lightningcss
-  },
   build: {
-    cssMinify: 'esbuild', // Використовувати стабільний мініфікатор
+    // Це вимкне складну обробку, яка може видавати помилку
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   }
 })
